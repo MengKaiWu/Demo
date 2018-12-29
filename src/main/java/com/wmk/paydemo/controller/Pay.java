@@ -31,7 +31,7 @@ public class Pay {
     private SystemPayConfigMapper systemPayConfigMapper;
 
     /**
-     * 微信支付测试
+     * 微信支付
      * @param ps
      * @return
      * @throws Exception
@@ -49,17 +49,37 @@ public class Pay {
     public void unifyPay(@RequestBody RequestPay requestPay,HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
         SystemPayConfig systemPayConfig = systemPayConfigMapper.selectByPrimaryKey(requestPay.getSystemId());
         if (systemPayConfig != null) {
-            if ("alipay_pc".equals(requestPay.getReqType())) {
+            if ("alipay_pc".equals(requestPay.getReqType())) {             //支付宝PC端
                 alipayService.payByPC(requestPay,systemPayConfig, httpRequest, httpResponse);
-            } else if ("alipay_appweb".equals(requestPay.getReqType())) {
+            } else if ("alipay_appweb".equals(requestPay.getReqType())) {  //支付宝WAP端
                 alipayService.payByPhoneWeb(systemPayConfig, httpRequest, httpResponse);
-            } else if ("alipay_app".equals(requestPay.getReqType())) {
+            } else if ("alipay_app".equals(requestPay.getReqType())) {     //支付宝APP端
+                //此功能暂未开发
+            } else if("".equals(requestPay.getReqType())){                 //微信PC端
+                try {
+                    wxpayService.nativePay(requestPay,systemPayConfig,httpResponse);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if("".equals(requestPay.getReqType())){                 //微信WAP端
 
+            } else if("".equals(requestPay.getReqType())){                 //微信APP端
+                //此功能暂未开发
             }
         } else {
             //处理系统账号不存在的情况
         }
     }
+
+    /**
+     * 支付宝支付测试
+     * @param reqType
+     * @param systemId
+     * @param httpRequest
+     * @param httpResponse
+     * @throws ServletException
+     * @throws IOException
+     */
     @GetMapping(value = "/topaytest")
     @ApiOperation(value = "请求支付测试")
     public void unifyPaytest(String reqType,String systemId,HttpServletRequest httpRequest, HttpServletResponse httpResponse)throws ServletException, IOException{
