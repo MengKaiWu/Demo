@@ -1,9 +1,14 @@
-package com.wmk.paydemo.test;
+package com.wmk.paydemo.controller;
 
 import com.wmk.paydemo.config.WeChatConfig;
+import com.wmk.paydemo.dao.SystemOrderMapper;
+import com.wmk.paydemo.dao.SystemPayConfigMapper;
+import com.wmk.paydemo.entity.SystemOrder;
 import com.wmk.paydemo.util.PayForUtil;
 import com.wmk.paydemo.util.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -13,17 +18,22 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
-
 @Slf4j
-public class HuiDiao {
+@Controller
+public class WxpayCallbackController {
+    @Autowired
+    private SystemOrderMapper systemOrderMapper;
+    @Autowired
+    private SystemPayConfigMapper systemPayConfigMapper;
     /**
      * pc端微信支付之后的回调方法
      * @param request
      * @param response
      * @throws Exception
      */
-    @RequestMapping(value="wechat_notify_url_pc",method= RequestMethod.POST)
+    @RequestMapping(value="wechat_notify_url_pc")
     public void wechat_notify_url_pc(HttpServletRequest request, HttpServletResponse response) throws Exception{
 
         //读取参数
@@ -92,8 +102,22 @@ public class HuiDiao {
                 log.info("total_fee:"+total_fee);
                 log.info("额外参数_attach:"+attach);
                 log.info("time_end:"+time_end);
-
-
+                System.out.println("++++++++++++++++++++++处理业务逻辑+++++++++++++++++++++++");
+                //更新数据库订单信息
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SystemOrder systemOrder = systemOrderMapper.selectByPrimaryKey(out_trade_no);
+                if(systemOrder!=null){
+                    systemOrder.setTradeNo();
+                    systemOrder.setBuyerId();
+                    systemOrder.setSellerId();
+                    systemOrder.setReceiptAmount(Double.valueOf());
+                    systemOrder.setBuyerPayAmount(Double.valueOf());
+                    systemOrder.setSubject();
+                    systemOrder.setGmtPayment();
+                    systemOrder.setTradeStatus(packageParams.get("result_code").toString());
+                    systemOrder.setReturnJson(packageParams.toString());
+                }
+                systemOrderMapper.updateByPrimaryKeySelective(systemOrder);
                 //执行自己的业务逻辑结束
                 log.info("支付成功");
                 //通知微信.异步确认成功.必写.不然会一直通知后台.八次之后就认为交易失败了.
@@ -116,6 +140,5 @@ public class HuiDiao {
         } else{
             log.info("通知签名验证失败");
         }
-
     }
 }
