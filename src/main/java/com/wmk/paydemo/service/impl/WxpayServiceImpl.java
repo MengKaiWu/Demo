@@ -25,7 +25,7 @@ public class WxpayServiceImpl implements WxpayService {
             order_num = systemOrder.getOrderId();
         }else{
             //生成唯一 随机单号
-            order_num = BuilderOrderNum.crete();
+            order_num = BuilderOrderNum.crete().substring(0,31);
             //记录此次订单信息
             SystemOrder systemOrder1 = new SystemOrder();
             systemOrder1.setOrderId(order_num);  //系统唯一订单号
@@ -36,7 +36,7 @@ public class WxpayServiceImpl implements WxpayService {
             systemOrderMapper.insertSelective(systemOrder1);
         }
         //调用微信支付
-        String content= com.wmk.paydemo.test.WeixinPay.getCodeUrl();
+        String content= com.wmk.paydemo.test.WeixinPay.getCodeUrl(requestPay,payConfig,order_num);
         com.wmk.paydemo.test.WeixinPay.encodeQrcode(content,response);
 
     }
@@ -45,12 +45,12 @@ public class WxpayServiceImpl implements WxpayService {
     public void nativePay(WeChatParams ps, HttpServletResponse response) throws Exception {
         ps.setBody("测试商品3");   //商品描述
         ps.setTotalFee("1");       //总金额
-        ps.setOutTradeNo("hw5409550792199899");  //商户内部订单号
+        ps.setOutTradeNo("hw5409550792199879");  //商户内部订单号
         ps.setAttach("xiner");                   //附加数据
         ps.setMemberid("888");
         //生成图片
-        String content= com.wmk.paydemo.test.WeixinPay.getCodeUrl(ps);
-        com.wmk.paydemo.test.WeixinPay.encodeQrcode(content,response);
+        //String content= com.wmk.paydemo.test.WeixinPay.getCodeUrl(ps);
+        //com.wmk.paydemo.test.WeixinPay.encodeQrcode(content,response);
         //PrintWriter pw = null;
         //pw.println("");
     }

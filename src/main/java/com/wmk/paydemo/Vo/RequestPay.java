@@ -31,4 +31,10 @@ public class RequestPay {
     @Getter
     @Setter
     private String sysServiceProviderId;//系统商编号,该参数作为系统商返佣数据提取的依据,必填
+    @Getter
+    @Setter
+    private String attach;//附加参数(微信使用)
+    @Getter
+    @Setter
+    public String memberid;//会员ID(微信使用)
 }

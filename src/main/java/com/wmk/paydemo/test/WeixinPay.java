@@ -4,8 +4,9 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.wmk.paydemo.Vo.WeChatParams;
+import com.wmk.paydemo.Vo.RequestPay;
 import com.wmk.paydemo.config.WeChatConfig;
+import com.wmk.paydemo.entity.SystemPayConfig;
 import com.wmk.paydemo.util.HttpUtil;
 import com.wmk.paydemo.util.PayForUtil;
 import com.wmk.paydemo.util.XMLUtil;
@@ -35,17 +36,16 @@ public class WeixinPay {
      * @author chenp
      * @throws Exception
      */
-    public static String getCodeUrl(WeChatParams ps) throws Exception {
+    public static String getCodeUrl(RequestPay requestPay, SystemPayConfig payConfig, String tradeNo) throws Exception {
         /**
          * 账号信息
          */
-        String appid = WeChatConfig.APPID;//微信服务号的appid
+        /*String appid = WeChatConfig.APPID;//微信服务号的appid
         String mch_id = WeChatConfig.MCHID; //微信支付商户号
         String key = WeChatConfig.APIKEY; // 微信支付的API密钥
         String notify_url = WeChatConfig.WECHAT_NOTIFY_URL_PC;//回调地址【注意，这里必须要使用外网的地址】
         String ufdoder_url=WeChatConfig.UFDODER_URL;//微信下单API地址
-        String trade_type = "NATIVE"; //类型【网页扫码支付】
-
+        String trade_type = "NATIVE"; //类型【网页扫码支付】*/
         /**
          * 时间字符串
          */
@@ -58,24 +58,27 @@ public class WeixinPay {
          * 参数封装
          */
         SortedMap<Object,Object> packageParams = new TreeMap<Object,Object>();
-        packageParams.put("appid", appid);
-        packageParams.put("mch_id", mch_id);
+        packageParams.put("appid", payConfig.getAppId());
+        packageParams.put("mch_id", payConfig.getMchId());
         packageParams.put("nonce_str", nonce_str);//随机字符串
-        packageParams.put("body", ps.body);//支付的商品名称
-        packageParams.put("out_trade_no", ps.getOutTradeNo()+nonce_str);//商户订单号【备注：每次发起请求都需要随机的字符串，否则失败。】
-        packageParams.put("total_fee", ps.getTotalFee());//支付金额
+        packageParams.put("body", requestPay.getSubject());//支付的商品名称
+        //packageParams.put("out_trade_no", ps.getOutTradeNo()+nonce_str);//商户订单号【备注：每次发起请求都需要随机的字符串，否则失败。】
+        packageParams.put("out_trade_no",tradeNo);
+        System.out.println("===================tradeNo"+tradeNo);
+        System.out.println("===================out_trade_no: "+"hw5409550792199879"+nonce_str);
+        packageParams.put("total_fee", requestPay.getTotalAmount());//支付金额
         packageParams.put("spbill_create_ip", PayForUtil.localIp());//客户端主机
-        packageParams.put("notify_url", notify_url);
-        packageParams.put("trade_type", trade_type);
-        packageParams.put("attach", ps.attach);//额外的参数【业务类型+会员ID+支付类型】
+        packageParams.put("notify_url", payConfig.getNotifyUrl());
+        packageParams.put("trade_type", payConfig.getSignType());
+        packageParams.put("attach", requestPay.getAttach());//额外的参数【业务类型+会员ID+支付类型】
 
 
-        String sign = PayForUtil.createSign("UTF-8", packageParams,key);  //获取签名
+        String sign = PayForUtil.createSign("UTF-8", packageParams,payConfig.getRsaPrivateKey());  //获取签名
         packageParams.put("sign", sign);
 
         String requestXML = PayForUtil.getRequestXml(packageParams);//将请求参数转换成String类型
         log.info("微信支付请求参数的报文"+requestXML);
-        String resXml = HttpUtil.postData(ufdoder_url,requestXML);  //解析请求之后的xml参数并且转换成String类型
+        String resXml = HttpUtil.postData(payConfig.getMethod(),requestXML);  //解析请求之后的xml参数并且转换成String类型
         Map map = XMLUtil.doXMLParse(resXml);
         log.info("微信支付响应参数的报文"+resXml);
         String urlCode = (String) map.get("code_url");

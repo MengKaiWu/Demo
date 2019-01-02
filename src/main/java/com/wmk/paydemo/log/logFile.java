@@ -9,7 +9,7 @@ import java.io.IOException;
  * 日志类
  */
 public class logFile {
-    public static void logResult(String sWord) {
+    /*public static void logResult(String sWord) {
         FileWriter writer = null;
         try {
             writer = new FileWriter(AlipayConfig.log_path + "alipay_log_" + System.currentTimeMillis() + ".txt");
@@ -25,5 +25,5 @@ public class logFile {
                 }
             }
         }
-    }
+    }*/
 }

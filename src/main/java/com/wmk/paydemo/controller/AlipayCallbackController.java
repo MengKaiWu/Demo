@@ -170,7 +170,7 @@ public class AlipayCallbackController {
      * @param params
      * @throws AlipayApiException
      */
-    private void check(Map<String, String> params,SystemPayConfig payConfig) throws AlipayApiException {
+    private void check(Map<String, String> params, SystemPayConfig payConfig) throws AlipayApiException {
         String outTradeNo = params.get("out_trade_no");
         // 验证通知数据中的out_trade_no是否为商户系统中创建的订单号，
         SystemOrder orderByOutTradeNo = getOrderByOutTradeNo(outTradeNo);

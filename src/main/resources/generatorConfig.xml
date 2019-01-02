@@ -82,8 +82,8 @@
 
 
         <table
-                tableName="system_order"
-                domainObjectName="SystemOrder"
+                tableName="system_pay_config"
+                domainObjectName="SystemPayConfig"
 
                 enableInsert="true"
                 enableSelectByPrimaryKey="true"

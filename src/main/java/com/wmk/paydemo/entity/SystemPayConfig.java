@@ -7,6 +7,8 @@ public class SystemPayConfig {
 
     private String appId;
 
+    private String mchId;
+
     private String method;
 
     private String format;
@@ -57,6 +59,14 @@ public class SystemPayConfig {
 
     public void setAppId(String appId) {
         this.appId = appId == null ? null : appId.trim();
+    }
+
+    public String getMchId() {
+        return mchId;
+    }
+
+    public void setMchId(String mchId) {
+        this.mchId = mchId == null ? null : mchId.trim();
     }
 
     public String getMethod() {

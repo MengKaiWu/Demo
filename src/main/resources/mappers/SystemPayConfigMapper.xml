@@ -5,6 +5,7 @@
     <id column="system_id" jdbcType="VARCHAR" property="systemId" />
     <result column="system_name" jdbcType="VARCHAR" property="systemName" />
     <result column="app_id" jdbcType="VARCHAR" property="appId" />
+    <result column="mch_id" jdbcType="VARCHAR" property="mchId" />
     <result column="method" jdbcType="VARCHAR" property="method" />
     <result column="format" jdbcType="VARCHAR" property="format" />
     <result column="return_url" jdbcType="VARCHAR" property="returnUrl" />
@@ -50,8 +51,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    system_id, system_name, app_id, method, format, return_url, charset, sign_type, sign, 
-    timestamp, version, notify_url, app_auth_token, biz_content, flag, RSA_PRIVATE_KEY, 
+    system_id, system_name, app_id, mch_id, method, format, return_url, charset, sign_type, 
+    sign, timestamp, version, notify_url, app_auth_token, biz_content, flag, RSA_PRIVATE_KEY, 
     ALIPAY_PUBLIC_KEY
   </sql>
   <select id="selectByExample" parameterType="com.wmk.paydemo.entity.SystemPayConfigExample" resultMap="BaseResultMap">
@@ -79,33 +80,35 @@
     where system_id = #{systemId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.wmk.paydemo.entity.SystemPayConfig">
-    <selectKey keyProperty="systemId" order="AFTER" resultType="java.lang.String">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into system_pay_config (system_name, app_id, method, 
-      format, return_url, charset, 
-      sign_type, sign, timestamp, 
-      version, notify_url, app_auth_token, 
-      biz_content, flag, RSA_PRIVATE_KEY, 
-      ALIPAY_PUBLIC_KEY)
-    values (#{systemName,jdbcType=VARCHAR}, #{appId,jdbcType=VARCHAR}, #{method,jdbcType=VARCHAR}, 
-      #{format,jdbcType=VARCHAR}, #{returnUrl,jdbcType=VARCHAR}, #{charset,jdbcType=VARCHAR}, 
-      #{signType,jdbcType=VARCHAR}, #{sign,jdbcType=VARCHAR}, #{timestamp,jdbcType=VARCHAR}, 
-      #{version,jdbcType=VARCHAR}, #{notifyUrl,jdbcType=VARCHAR}, #{appAuthToken,jdbcType=VARCHAR}, 
-      #{bizContent,jdbcType=VARCHAR}, #{flag,jdbcType=INTEGER}, #{rsaPrivateKey,jdbcType=VARCHAR}, 
-      #{alipayPublicKey,jdbcType=VARCHAR})
+    insert into system_pay_config (system_id, system_name, app_id, 
+      mch_id, method, format, 
+      return_url, charset, sign_type, 
+      sign, timestamp, version, 
+      notify_url, app_auth_token, biz_content, 
+      flag, RSA_PRIVATE_KEY, ALIPAY_PUBLIC_KEY
+      )
+    values (#{systemId,jdbcType=VARCHAR}, #{systemName,jdbcType=VARCHAR}, #{appId,jdbcType=VARCHAR}, 
+      #{mchId,jdbcType=VARCHAR}, #{method,jdbcType=VARCHAR}, #{format,jdbcType=VARCHAR}, 
+      #{returnUrl,jdbcType=VARCHAR}, #{charset,jdbcType=VARCHAR}, #{signType,jdbcType=VARCHAR}, 
+      #{sign,jdbcType=VARCHAR}, #{timestamp,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR}, 
+      #{notifyUrl,jdbcType=VARCHAR}, #{appAuthToken,jdbcType=VARCHAR}, #{bizContent,jdbcType=VARCHAR}, 
+      #{flag,jdbcType=INTEGER}, #{rsaPrivateKey,jdbcType=VARCHAR}, #{alipayPublicKey,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.wmk.paydemo.entity.SystemPayConfig">
-    <selectKey keyProperty="systemId" order="AFTER" resultType="java.lang.String">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
     insert into system_pay_config
     <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="systemId != null">
+        system_id,
+      </if>
       <if test="systemName != null">
         system_name,
       </if>
       <if test="appId != null">
         app_id,
+      </if>
+      <if test="mchId != null">
+        mch_id,
       </if>
       <if test="method != null">
         method,
@@ -151,11 +154,17 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="systemId != null">
+        #{systemId,jdbcType=VARCHAR},
+      </if>
       <if test="systemName != null">
         #{systemName,jdbcType=VARCHAR},
       </if>
       <if test="appId != null">
         #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="mchId != null">
+        #{mchId,jdbcType=VARCHAR},
       </if>
       <if test="method != null">
         #{method,jdbcType=VARCHAR},
@@ -210,6 +219,9 @@
       <if test="appId != null">
         app_id = #{appId,jdbcType=VARCHAR},
       </if>
+      <if test="mchId != null">
+        mch_id = #{mchId,jdbcType=VARCHAR},
+      </if>
       <if test="method != null">
         method = #{method,jdbcType=VARCHAR},
       </if>
@@ -259,6 +271,7 @@
     update system_pay_config
     set system_name = #{systemName,jdbcType=VARCHAR},
       app_id = #{appId,jdbcType=VARCHAR},
+      mch_id = #{mchId,jdbcType=VARCHAR},
       method = #{method,jdbcType=VARCHAR},
       format = #{format,jdbcType=VARCHAR},
       return_url = #{returnUrl,jdbcType=VARCHAR},

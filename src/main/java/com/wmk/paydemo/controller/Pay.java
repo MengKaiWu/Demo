@@ -55,7 +55,7 @@ public class Pay {
                 alipayService.payByPhoneWeb(systemPayConfig, httpRequest, httpResponse);
             } else if ("alipay_app".equals(requestPay.getReqType())) {     //支付宝APP端
                 //此功能暂未开发
-            } else if("".equals(requestPay.getReqType())){                 //微信PC端
+            } else if("wxpay_pc".equals(requestPay.getReqType())){                 //微信PC端
                 try {
                     wxpayService.nativePay(requestPay,systemPayConfig,httpResponse);
                 } catch (Exception e) {
