@@ -23,7 +23,7 @@ public class AlirefundServiceImpl implements AlirefundService {
     @Autowired
     private SystemOrderMapper systemOrderMapper;
     @Override
-    public String refundByPC(Refundmsg refundmsg, SystemPayConfig systemPayConfig, String orderId) {
+    public String refundByPC(SystemPayConfig systemPayConfig, String orderId) {
         //根据订单ID查询退款信息
         SystemOrder systemOrder = systemOrderMapper.selectByPrimaryKey(orderId);
         if(systemOrder==null){
@@ -57,9 +57,9 @@ public class AlirefundServiceImpl implements AlirefundService {
             e.printStackTrace();
         }
         if (response.isSuccess()) {
-            return "Success";
+            return "SUCCESS";
         } else {
-            return "Fail";
+            return "FAIL";
         }
     }
 }

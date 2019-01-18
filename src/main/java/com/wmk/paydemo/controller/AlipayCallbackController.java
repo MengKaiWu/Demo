@@ -102,7 +102,7 @@ public class AlipayCallbackController {
                                 Map<String,String> map = new HashMap<>();
                                 map.put("cashflow",systemOrder.getCashflowSn());
                                 map.put("tradesn",systemOrder.getOrderId());
-                                String maps = getMap("http://118.190.202.65:8081/order", map);
+                                String maps = getMap("http://118.190.202.65:8081/order/callback", map);
                                 //判段用户是否收到通知
                                 if(!maps.equals("true")){
                                     System.out.println("====================传输异常！");

@@ -1,9 +1,12 @@
 package com.wmk.paydemo.controller;
 
+import com.wmk.paydemo.dao.SystemOrderMapper;
 import com.wmk.paydemo.dao.SystemPayConfigMapper;
 import com.wmk.paydemo.entity.Refundmsg;
+import com.wmk.paydemo.entity.SystemOrder;
 import com.wmk.paydemo.entity.SystemPayConfig;
 import com.wmk.paydemo.service.AlirefundService;
+import com.wmk.paydemo.service.WxrefudeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +22,33 @@ public class Refund {
     @Autowired
     private AlirefundService alirefundService;
     @Autowired
+    private WxrefudeService wxrefudeService;
+    @Autowired
     private SystemPayConfigMapper systemPayConfigMapper;
+    @Autowired
+    private SystemOrderMapper systemOrderMapper;
 
     /**
-     * @param reqType   退款类型，支付宝退款或微信退款
-     * @param system_id 退款系统编号
      * @param order_id  退款的订单号
      */
     @GetMapping(value = "/torefund")
     @ApiOperation(value = "请求退款")
-    public String unifyRefund(Refundmsg refundmsg,String reqType, String system_id, String order_id) {
+    public String unifyRefund(String order_id) {
         String result = null;
-        SystemPayConfig systemPayConfig = systemPayConfigMapper.selectByPrimaryKey(system_id);
+        //从数据库查询该笔订单的信息
+        SystemOrder systemOrder = systemOrderMapper.selectByPrimaryKey(order_id);
+        if(systemOrder==null){
+            return "未查到该笔订单，请检查参数";
+        }
+        SystemPayConfig systemPayConfig = systemPayConfigMapper.selectByPrimaryKey(systemOrder.getSystemId());
         if (systemPayConfig != null) {
-            if (reqType.equals("AliRefund")) {
-                result = alirefundService.refundByPC(refundmsg, systemPayConfig, order_id);
-            } else if (reqType.equals("WxRefund")) {
+            if (systemOrder.getSystemId().equals("1")) {
+                result = alirefundService.refundByPC(systemPayConfig, order_id);
+            } else if (systemOrder.getSystemId().equals("2")) {
+                result = wxrefudeService.refundByPC(systemPayConfig, order_id);
             }
         } else {
-            //处理异常
+            return "参数异常,请检查后重试";
         }
         return result;
     }

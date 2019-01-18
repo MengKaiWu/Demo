@@ -1,5 +1,6 @@
 package com.wmk.paydemo.service.impl;
 
+import com.google.zxing.WriterException;
 import com.wmk.paydemo.Vo.RequestPay;
 import com.wmk.paydemo.Vo.WeChatParams;
 import com.wmk.paydemo.dao.SystemOrderMapper;
@@ -7,10 +8,15 @@ import com.wmk.paydemo.entity.SystemOrder;
 import com.wmk.paydemo.entity.SystemPayConfig;
 import com.wmk.paydemo.service.WxpayService;
 import com.wmk.paydemo.util.BuilderOrderNum;
+import com.wmk.paydemo.util.QRCodeFactory;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 public class WxpayServiceImpl implements WxpayService {
@@ -37,6 +43,10 @@ public class WxpayServiceImpl implements WxpayService {
         }
         //调用微信支付
         String content= com.wmk.paydemo.test.WeixinPay.getCodeUrl(requestPay,payConfig,order_num);
+        response.setContentType("text/plain; charset=utf-8");
+        response.getWriter().write(content);
+        response.getWriter().flush();
+        response.getWriter().close();
         com.wmk.paydemo.test.WeixinPay.encodeQrcode(content,response);
 
     }

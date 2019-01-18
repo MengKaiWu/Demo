@@ -7,6 +7,16 @@ import com.wmk.paydemo.entity.SystemOrder;
 import com.wmk.paydemo.util.PayForUtil;
 import com.wmk.paydemo.util.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 @Slf4j
@@ -107,17 +115,23 @@ public class WxpayCallbackController {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 SystemOrder systemOrder = systemOrderMapper.selectByPrimaryKey(out_trade_no);
                 if(systemOrder!=null){
-                    systemOrder.setTradeNo();
-                    systemOrder.setBuyerId();
-                    systemOrder.setSellerId();
-                    systemOrder.setReceiptAmount(Double.valueOf());
-                    systemOrder.setBuyerPayAmount(Double.valueOf());
-                    systemOrder.setSubject();
-                    systemOrder.setGmtPayment();
+                    systemOrder.setTradeNo(transaction_id);
+                    systemOrder.setReceiptAmount(Double.valueOf(total_fee));
+                    systemOrder.setBuyerPayAmount(Double.valueOf(total_fee));
+                    //systemOrder.setGmtPayment(sdf.parse());
                     systemOrder.setTradeStatus(packageParams.get("result_code").toString());
                     systemOrder.setReturnJson(packageParams.toString());
                 }
                 systemOrderMapper.updateByPrimaryKeySelective(systemOrder);
+                //通知调用者支付成功(并返回订单号)
+                Map<String,String> map = new HashMap<>();
+                map.put("cashflow",systemOrder.getCashflowSn());
+                map.put("tradesn",systemOrder.getOrderId());
+                String maps = getMap("http://118.190.202.65:8081/order/callback", map);
+                //判段用户是否收到通知
+                if(!maps.equals("true")){
+                    System.out.println("====================传输异常！");
+                }
                 //执行自己的业务逻辑结束
                 log.info("支付成功");
                 //通知微信.异步确认成功.必写.不然会一直通知后台.八次之后就认为交易失败了.
@@ -140,5 +154,49 @@ public class WxpayCallbackController {
         } else{
             log.info("通知签名验证失败");
         }
+    }
+
+    public static String getMap(String url,Map<String,String> map)
+    {
+        String result = null;
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        //封装请求参数
+        for(Map.Entry<String,String> entry : map.entrySet())
+        {
+            pairs.add(new BasicNameValuePair(entry.getKey(),entry.getValue()));
+        }
+        //接受响应结果
+        CloseableHttpResponse response = null;
+        try {
+            //设置请求地址
+            URIBuilder builder = new URIBuilder(url);
+            builder.setParameters(pairs);
+            HttpGet get = new HttpGet(builder.build());
+            response = httpClient.execute(get);
+            if(response != null && response.getStatusLine().getStatusCode() == 200)
+            {
+                HttpEntity entity = response.getEntity();
+                result = EntityUtils.toString(entity);
+            }
+            return result;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                httpClient.close();
+                if(response != null)
+                {
+                    response.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }

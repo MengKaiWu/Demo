@@ -49,21 +49,21 @@ public class Pay {
     public void unifyPay(@RequestBody RequestPay requestPay,HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
         SystemPayConfig systemPayConfig = systemPayConfigMapper.selectByPrimaryKey(requestPay.getSystemId());
         if (systemPayConfig != null) {
-            if ("alipay_pc".equals(requestPay.getReqType())) {             //支付宝PC端
+            if ("1".equals(requestPay.getReqType())) {             //支付宝PC端
                 alipayService.payByPC(requestPay,systemPayConfig, httpRequest, httpResponse);
-            } else if ("alipay_appweb".equals(requestPay.getReqType())) {  //支付宝WAP端
+            } else if ("3".equals(requestPay.getReqType())) {  //支付宝WAP端
                 alipayService.payByPhoneWeb(systemPayConfig, httpRequest, httpResponse);
-            } else if ("alipay_app".equals(requestPay.getReqType())) {     //支付宝APP端
+            } else if ("5".equals(requestPay.getReqType())) {     //支付宝APP端
                 //此功能暂未开发
-            } else if("wxpay_pc".equals(requestPay.getReqType())){                 //微信PC端
+            } else if("2".equals(requestPay.getReqType())){                 //微信PC端
                 try {
                     wxpayService.nativePay(requestPay,systemPayConfig,httpResponse);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if("".equals(requestPay.getReqType())){                 //微信WAP端
+            } else if("4".equals(requestPay.getReqType())){                 //微信WAP端
 
-            } else if("".equals(requestPay.getReqType())){                 //微信APP端
+            } else if("6".equals(requestPay.getReqType())){                 //微信APP端
                 //此功能暂未开发
             }
         } else {
